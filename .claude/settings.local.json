@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(ls /c/Users/User/chemistry-maze/*.gd)",
+      "Bash(ls /c/Users/User/chemistry-maze/*.gd.uid)",
+      "Bash(node -e \":*)",
+      "Bash(node tools/gen_joystick.js)"
+    ]
+  }
+}
