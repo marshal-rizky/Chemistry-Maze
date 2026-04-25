@@ -61,7 +61,7 @@ var legend_questions: Array = []   # loaded from questions.json where "legend": 
 ### Tutorial Maze
 - Dedicated `tutorial_layout` string in `maze_manager.gd` (20×15, simple open layout)
 - H₂O: 2×H + 1×O atoms placed far apart to encourage exploration
-- No decoy atoms
+- One decoy atom placed visibly (e.g. Na) — gives step 4's "don't collect extras" warning real context
 - S at top-left, E at bottom-right
 
 ### TutorialManager Node
@@ -74,8 +74,10 @@ Step sequence:
 | 1 | `_ready()` | "Use WASD / arrows or the joystick to move." | Player moves (velocity ≠ zero) |
 | 2 | After step 1 | "Collect the atoms shown in your HUD to form the molecule." (arrow → ObjectiveLabel) | Tap/click |
 | 3 | First atom collected (`player.collected_signal`) | "Great! Watch your inventory update." (arrow → InventoryLabel) | Tap/click |
-| 4 | Gate opens (all atoms collected) | "Molecule complete! The exit gate is now open — reach it to finish." | Tap/click |
-| 5 | Player touches gate | Custom overlay: "Tutorial complete! You're ready to play." + Back to Menu button | Button press |
+| 4 | After step 3 | "Warning: only collect the atoms you need. Extra atoms will keep the gate locked!" | Tap/click |
+| 5 | After step 4 | "Picked up the wrong atom? Press R (or the Reset button) to restart the level." (arrow → ResetBtn) | Tap/click |
+| 6 | Gate opens (all atoms collected) | "Molecule complete! The exit gate is now open — reach it to finish." | Tap/click |
+| 7 | Player touches gate | Custom overlay: "Tutorial complete! You're ready to play." + Back to Menu button | Button press |
 
 - Game is **not paused** during panels — player moves freely
 - `TutorialManager` connects to `player.collected_signal` and `exit_gate.level_completed`
