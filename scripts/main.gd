@@ -128,7 +128,6 @@ func _setup_legend_second_player(maze_data: Dictionary, player_left: CharacterBo
 func _setup_tutorial(player: CharacterBody2D, exit_gate: Node):
 	var tm = $UI/TutorialManager
 	if not tm: return
-	tm.visible = true
 
 	var panel = Panel.new()
 	panel.name = "TutorialPanel"
