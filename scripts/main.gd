@@ -22,6 +22,7 @@ func _ready():
 	$UI/WinOverlay/VBox/NextBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_next_level_pressed())
 	$UI/MasterOverlay/VBox/RestartBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_restart_game_pressed())
 	$UI/HUD/HBar/ResetBtn.pressed.connect(func(): AudioManager.play_sfx("reset"); get_tree().reload_current_scene())
+	$UI/HUD/HBar/LeaveBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _go_to_menu())
 
 	$UI/TutorialWinOverlay/VBox/MenuBtn.pressed.connect(func():
 		AudioManager.play_sfx("ui_click")
@@ -269,6 +270,10 @@ func transition_to_next():
 		GameManager.next_level()
 		get_tree().reload_current_scene()
 	)
+
+func _go_to_menu():
+	GameManager.reset_mode_flags()
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 func _on_restart_game_pressed():
 	GameManager.reset_mode_flags()
