@@ -15,6 +15,7 @@ motion_mode = 1
 script = ExtResource("1_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.33, 0.33)
 texture_filter = 0
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
