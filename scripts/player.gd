@@ -103,7 +103,7 @@ func _on_pickup_zone_area_exited(area):
 func _on_element_collected(symbol):
 	# Play pick-up animation if available
 	var anim = get_node_or_null("AnimatedSprite2D")
-	if anim and anim.has_animation("collect"):
+	if anim and anim.sprite_frames and anim.sprite_frames.has_animation("collect"):
 		anim.play("collect")
 		await anim.animation_finished
 	if not collected_elements.has(symbol):
@@ -145,7 +145,7 @@ func _update_animation():
 			anim.play(walk_anim)
 	else:
 		var idle_anim = "idle_" + _last_dir
-		if anim.has_animation(idle_anim):
+		if anim.sprite_frames and anim.sprite_frames.has_animation(idle_anim):
 			if anim.animation != idle_anim or not anim.is_playing():
 				anim.play(idle_anim)
 		else:
