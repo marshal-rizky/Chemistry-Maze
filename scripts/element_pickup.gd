@@ -5,7 +5,6 @@ signal collected(element_symbol)
 @export var element_symbol: String = "H"
 
 var _tutorial_tween: Tween = null
-var _ring_angle: float = 0.0
 
 var element_colors = {
 	"H": Color.CYAN,
@@ -27,34 +26,38 @@ var element_colors = {
 }
 
 func _ready():
-	var color = element_colors.get(element_symbol, Color.WHITE)
-	$OrbSprite.modulate = color
-	$OrbSprite.scale = Vector2(0.5, 0.5)
-	$Label.text = element_symbol
-	$Label.add_theme_color_override("font_color", color)
+	var bob_tween = create_tween().set_loops()
+	bob_tween.tween_property(self, "position:y", position.y - 2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	bob_tween.tween_property(self, "position:y", position.y + 2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 
-	# Bobbing animation (keeps collision center static)
-	var tween = create_tween().set_loops()
-	tween.set_parallel(true)
-	tween.tween_property($OrbSprite, "position:y", -2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	tween.tween_property($Label, "position:y", -14, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	tween.chain().tween_property($OrbSprite, "position:y", 2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	tween.tween_property($Label, "position:y", -10, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-
-	# Glow pulse on orb alpha
 	var glow_tween = create_tween().set_loops()
-	glow_tween.tween_property($OrbSprite, "modulate:a", 0.5, 1.0)
-	glow_tween.tween_property($OrbSprite, "modulate:a", 1.0, 1.0)
-
-func _process(delta: float):
-	_ring_angle += delta * TAU / 3.0
-	queue_redraw()
+	glow_tween.tween_property(self, "modulate:a", 0.5, 1.0)
+	glow_tween.tween_property(self, "modulate:a", 1.0, 1.0)
 
 func _draw():
 	var color = element_colors.get(element_symbol, Color.WHITE)
-	color.a = 0.45
-	# 270-degree spinning arc — orbital ring effect
-	draw_arc(Vector2.ZERO, 12.0, _ring_angle, _ring_angle + TAU * 0.75, 36, color, 1.5, true)
+
+	# Pixel-art flat-top hexagon at radius 7
+	var pts := PackedVector2Array()
+	for i in 6:
+		var a := deg_to_rad(60.0 * i - 30.0)
+		pts.append(Vector2(cos(a), sin(a)) * 7.0)
+
+	# Fill
+	var fill_color = color
+	fill_color.a = 0.18
+	draw_colored_polygon(pts, fill_color)
+
+	# Stroke — close the loop
+	var stroke_pts = pts + PackedVector2Array([pts[0]])
+	draw_polyline(stroke_pts, color, 1.5, false)
+
+	# Symbol centered
+	var font = ThemeDB.fallback_font
+	var font_size = 8
+	var text_size = font.get_string_size(element_symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	var text_pos = Vector2(-text_size.x / 2.0, text_size.y / 2.0 - 2.0)
+	draw_string(font, text_pos, element_symbol, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 func collect():
 	play_collect_effect()
@@ -67,17 +70,17 @@ func play_collect_effect():
 	var color = element_colors.get(element_symbol, Color.WHITE)
 	var scene_root = get_tree().current_scene
 
-	var flash = Sprite2D.new()
-	flash.texture = $OrbSprite.texture
-	flash.global_position = global_position
-	flash.modulate = Color.WHITE
-	flash.z_index = 10
-	scene_root.add_child(flash)
-	var ft = flash.create_tween()
+	var dot = ColorRect.new()
+	dot.size = Vector2(14, 14)
+	dot.color = color
+	dot.global_position = global_position - Vector2(7, 7)
+	dot.z_index = 10
+	scene_root.add_child(dot)
+	var ft = dot.create_tween()
 	ft.set_parallel(true)
-	ft.tween_property(flash, "scale", Vector2(3, 3), 0.3)
-	ft.tween_property(flash, "modulate:a", 0.0, 0.3)
-	ft.tween_callback(flash.queue_free).set_delay(0.3)
+	ft.tween_property(dot, "scale", Vector2(3, 3), 0.3)
+	ft.tween_property(dot, "modulate:a", 0.0, 0.3)
+	ft.tween_callback(dot.queue_free).set_delay(0.3)
 
 	for i in range(8):
 		var particle = ColorRect.new()
