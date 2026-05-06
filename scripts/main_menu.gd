@@ -75,24 +75,30 @@ func spawn_floating_atoms():
 	var element_colors = {
 		"H": Color.CYAN, "O": Color.RED, "C": Color.GRAY,
 		"Na": Color.YELLOW, "Cl": Color.GREEN, "N": Color.BLUE,
-		"Mg": Color.ORANGE, "Ca": Color.ORANGE_RED
+		"Mg": Color.ORANGE, "Ca": Color.ORANGE_RED, "Si": Color.SADDLE_BROWN,
+		"S": Color.YELLOW_GREEN, "K": Color.MEDIUM_PURPLE, "Fe": Color.DARK_GRAY,
+		"Cu": Color.CORAL, "Zn": Color.LIGHT_SLATE_GRAY, "P": Color.LIME_GREEN,
+		"Al": Color.SILVER
 	}
 	var symbols = element_colors.keys()
-	for i in range(18):
-		var sym = symbols[randi() % symbols.size()]
-		var col = element_colors[sym]
-		col.a = randf_range(0.15, 0.35)
-		var dot = ColorRect.new()
-		dot.size = Vector2.ONE * randf_range(3, 8)
-		dot.color = col
-		dot.position = Vector2(randf_range(0, 1280), randf_range(0, 720))
-		dot.z_index = -5
-		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(dot)
+	for i in range(35):
+		var sym: String = symbols[randi() % symbols.size()]
+		var col: Color = element_colors[sym]
+		col.a = randf_range(0.04, 0.08)
+
+		var lbl = Label.new()
+		lbl.text = sym
+		lbl.add_theme_font_size_override("font_size", randi_range(28, 52))
+		lbl.add_theme_color_override("font_color", col)
+		lbl.position = Vector2(randf_range(0, 1280), randf_range(0, 720))
+		lbl.z_index = -5
+		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(lbl)
+
 		var tween = create_tween().set_loops()
-		var target = dot.position + Vector2(randf_range(-120, 120), randf_range(-120, 120))
-		tween.tween_property(dot, "position", target, randf_range(4.0, 8.0)).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(dot, "position", dot.position, randf_range(4.0, 8.0)).set_ease(Tween.EASE_IN_OUT)
+		var target = lbl.position + Vector2(randf_range(-150, 150), randf_range(-150, 150))
+		tween.tween_property(lbl, "position", target, randf_range(6.0, 12.0)).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(lbl, "position", lbl.position, randf_range(6.0, 12.0)).set_ease(Tween.EASE_IN_OUT)
 
 func _on_start_pressed():
 	GameManager.reset_mode_flags()
