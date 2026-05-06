@@ -10,14 +10,21 @@ func _ready():
 	$UI/LevelSelector.theme = game_theme
 	$UI/WinOverlay.theme = game_theme
 	$UI/MasterOverlay.theme = game_theme
+	$UI/TutorialWinOverlay.theme = game_theme
+	$UI/LegendaryOverlay.theme = game_theme
 
 	var navbar_style = StyleBoxFlat.new()
-	navbar_style.bg_color = Color(0.04, 0.02, 0.02, 0.85)
-	navbar_style.border_color = Color(0.5, 0.0, 0.0, 0.4)
-	navbar_style.border_width_bottom = 1
+	navbar_style.bg_color = Color(0.027, 0.043, 0.075, 0.92)
+	navbar_style.border_color = UITheme.BORDER
+	navbar_style.border_width_bottom = 2
 	navbar_style.set_corner_radius_all(0)
 	navbar_style.set_content_margin_all(6)
 	$UI/HUD.add_theme_stylebox_override("panel", navbar_style)
+
+	# HUD label retint to match terminal palette
+	$UI/HUD/HBar/ObjectiveLabel.add_theme_color_override("font_color", UITheme.TEXT_HI)
+	$UI/HUD/HBar/InventoryLabel.add_theme_color_override("font_color", UITheme.TEXT)
+	$UI/HUD/HBar/ControlHint.add_theme_color_override("font_color", UITheme.TEXT_DIM)
 
 	$UI/WinOverlay/VBox/NextBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_next_level_pressed())
 	$UI/MasterOverlay/VBox/RestartBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_restart_game_pressed())
@@ -37,6 +44,11 @@ func _ready():
 	)
 
 	var selector = $UI/LevelSelector
+	if GameManager.is_tutorial:
+		selector.visible = false
+	elif GameManager.is_legend_mode:
+		for i in range(selector.get_child_count()):
+			selector.get_child(i).visible = i < 3
 	for i in range(selector.get_child_count()):
 		var btn = selector.get_child(i)
 		var level_idx = i
@@ -160,7 +172,14 @@ func _setup_tutorial(player: CharacterBody2D, exit_gate: Node):
 	tm.panel_label = lbl
 	tm.dismiss_btn = btn
 	btn.pressed.connect(tm._on_dismiss_pressed)
-	tm.setup(player, exit_gate)
+
+	var pickups: Array = []
+	for child in current_maze.get_children():
+		if child.has_method("set_tutorial_highlight"):
+			pickups.append(child)
+
+	var required = GameManager.get_current_question().required
+	tm.setup(player, exit_gate, required, pickups)
 
 func setup_vignette():
 	if get_node_or_null("UI/Vignette"): return
@@ -290,7 +309,10 @@ func _on_restart_game_pressed():
 	get_tree().call_deferred("reload_current_scene")
 
 func _on_level_jump(index: int):
-	GameManager.current_level = index
+	if GameManager.is_legend_mode:
+		GameManager.legend_level = index
+	else:
+		GameManager.current_level = index
 	get_tree().call_deferred("reload_current_scene")
 
 func format_inventory(inventory: Dictionary) -> String:
