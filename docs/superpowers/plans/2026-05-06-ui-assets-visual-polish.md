@@ -1,6 +1,8 @@
 # UI Assets & Visual Polish — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+>
+> **Chosen execution method:** Inline (superpowers:executing-plans). Run this plan in a new session by asking Claude to execute `docs/superpowers/plans/2026-05-06-ui-assets-visual-polish.md`.
 
 **Goal:** Replace placeholder UI visuals with a cohesive dark pixel-terminal aesthetic across font, main menu, element pickups, and HUD buttons.
 
