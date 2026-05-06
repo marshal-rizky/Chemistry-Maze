@@ -9,6 +9,7 @@ var exit_gate: Node = null
 var panel: Panel = null
 var panel_label: RichTextLabel = null
 var dismiss_btn: Button = null
+var step_dots_container: HBoxContainer = null
 
 var required_elements: Dictionary = {}
 var element_pickups: Array = []
@@ -75,6 +76,16 @@ func show_step(index: int):
 	panel.visible = true
 	if index == STEP_COLLECT:
 		_apply_atom_glow()
+	_update_step_dots()
+
+func _update_step_dots():
+	if not step_dots_container: return
+	var dots = step_dots_container.get_children()
+	for i in range(dots.size()):
+		if i <= current_step:
+			dots[i].color = Color("#14b8a6")
+		else:
+			dots[i].color = Color("#1d3554")
 
 func advance_step():
 	if step_complete: return
