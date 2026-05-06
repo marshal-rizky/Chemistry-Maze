@@ -31,6 +31,10 @@ func _ready():
 	$UI/HUD/HBar/ResetBtn.pressed.connect(func(): AudioManager.play_sfx("reset"); get_tree().reload_current_scene())
 	$UI/HUD/HBar/LeaveBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _go_to_menu())
 
+	$UI/HUD/HBar/ResetBtn.text = "↺ Reset"
+	$UI/HUD/HBar/LeaveBtn.text = "✕ Leave"
+	$UI/WinOverlay/VBox/NextBtn.text = "Next →"
+
 	$UI/TutorialWinOverlay/VBox/MenuBtn.pressed.connect(func():
 		AudioManager.play_sfx("ui_click")
 		GameManager.reset_mode_flags()
