@@ -34,6 +34,8 @@ func _ready():
 	glow_tween.tween_property(self, "modulate:a", 0.5, 1.0)
 	glow_tween.tween_property(self, "modulate:a", 1.0, 1.0)
 
+	queue_redraw()
+
 func _draw():
 	var color = element_colors.get(element_symbol, Color.WHITE)
 
@@ -62,8 +64,6 @@ func _draw():
 func collect():
 	play_collect_effect()
 	collected.emit(element_symbol)
-	for sig in collected.get_connections():
-		collected.disconnect(sig.callable)
 	queue_free()
 
 func play_collect_effect():
