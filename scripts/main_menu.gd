@@ -2,7 +2,9 @@ extends Control
 
 func _ready():
 	theme = UITheme.create_game_theme()
-	$VBoxContainer/Title.modulate = Color(0, 1, 1)
+
+	_spawn_grid_bg()
+	_spawn_logo()
 
 	$VBoxContainer/StartBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_start_pressed())
 	$VBoxContainer/TutorialBtn.pressed.connect(func(): AudioManager.play_sfx("ui_click"); _on_tutorial_pressed())
@@ -16,19 +18,81 @@ func _ready():
 	AudioManager.play_music()
 	spawn_floating_atoms()
 
+func _spawn_grid_bg():
+	var grid = ColorRect.new()
+	grid.name = "GridBg"
+	grid.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grid.z_index = -10
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shader = load("res://assets/shaders/grid.gdshader")
+	var mat = ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("grid_size", 24.0)
+	mat.set_shader_parameter("bg_color", Color(0.027, 0.043, 0.075, 1.0))
+	mat.set_shader_parameter("line_color", Color(0.078, 0.718, 0.651, 0.12))
+	mat.set_shader_parameter("line_width", 0.5)
+	grid.material = mat
+	grid.color = Color.WHITE
+	add_child(grid)
+	move_child(grid, 0)
+
+func _spawn_logo():
+	var hbox = HBoxContainer.new()
+	hbox.name = "LogoRow"
+	hbox.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	hbox.offset_top = 40
+	hbox.offset_bottom = 100
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 10)
+	add_child(hbox)
+
+	var hex_lbl = Label.new()
+	hex_lbl.text = "⬡"
+	hex_lbl.add_theme_font_size_override("font_size", 32)
+	hex_lbl.add_theme_color_override("font_color", Color("#14b8a6"))
+	hbox.add_child(hex_lbl)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+
+	var title_lbl = Label.new()
+	title_lbl.text = "CHEMBOND"
+	title_lbl.add_theme_font_size_override("font_size", 28)
+	title_lbl.add_theme_color_override("font_color", Color("#5eead4"))
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	vbox.add_child(title_lbl)
+
+	var sub_lbl = Label.new()
+	sub_lbl.text = "ADVENTURE"
+	sub_lbl.add_theme_font_size_override("font_size", 12)
+	sub_lbl.add_theme_color_override("font_color", Color("#cfeae6"))
+	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	vbox.add_child(sub_lbl)
+
+	hbox.add_child(vbox)
+
 func spawn_floating_atoms():
-	var symbols = ["H", "O", "C", "Na", "Cl", "Si"]
-	for i in range(12):
-		var atom = Label.new()
-		atom.text = symbols[randi() % symbols.size()]
-		atom.scale = Vector2(2, 2)
-		atom.position = Vector2(randf_range(0, 1280), randf_range(0, 720))
-		atom.modulate.a = 0.3
-		add_child(atom)
+	var element_colors = {
+		"H": Color.CYAN, "O": Color.RED, "C": Color.GRAY,
+		"Na": Color.YELLOW, "Cl": Color.GREEN, "N": Color.BLUE,
+		"Mg": Color.ORANGE, "Ca": Color.ORANGE_RED
+	}
+	var symbols = element_colors.keys()
+	for i in range(18):
+		var sym = symbols[randi() % symbols.size()]
+		var col = element_colors[sym]
+		col.a = randf_range(0.15, 0.35)
+		var dot = ColorRect.new()
+		dot.size = Vector2.ONE * randf_range(3, 8)
+		dot.color = col
+		dot.position = Vector2(randf_range(0, 1280), randf_range(0, 720))
+		dot.z_index = -5
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(dot)
 		var tween = create_tween().set_loops()
-		var target = atom.position + Vector2(randf_range(-100, 100), randf_range(-100, 100))
-		tween.tween_property(atom, "position", target, randf_range(3.0, 6.0)).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(atom, "position", atom.position, randf_range(3.0, 6.0)).set_ease(Tween.EASE_IN_OUT)
+		var target = dot.position + Vector2(randf_range(-120, 120), randf_range(-120, 120))
+		tween.tween_property(dot, "position", target, randf_range(4.0, 8.0)).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(dot, "position", dot.position, randf_range(4.0, 8.0)).set_ease(Tween.EASE_IN_OUT)
 
 func _on_start_pressed():
 	GameManager.reset_mode_flags()
