@@ -5,6 +5,7 @@ signal collected(element_symbol)
 @export var element_symbol: String = "H"
 
 var _tutorial_tween: Tween = null
+var _ring_angle: float = 0.0
 
 var element_colors = {
 	"H": Color.CYAN,
@@ -26,28 +27,38 @@ var element_colors = {
 }
 
 func _ready():
-	$Label.text = element_symbol
 	var color = element_colors.get(element_symbol, Color.WHITE)
-	$Sprite2D.modulate = color
-	$Sprite2D.scale = Vector2(0.5, 0.5)  # sprites generated at 32px, display at 16px
-	
-	# Bobbing animation (Visual Only - keeps collision center static)
+	$OrbSprite.modulate = color
+	$OrbSprite.scale = Vector2(0.5, 0.5)
+	$Label.text = element_symbol
+	$Label.add_theme_color_override("font_color", color)
+
+	# Bobbing animation (keeps collision center static)
 	var tween = create_tween().set_loops()
 	tween.set_parallel(true)
-	tween.tween_property($Sprite2D, "position:y", -2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tween.tween_property($OrbSprite, "position:y", -2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tween.tween_property($Label, "position:y", -14, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	tween.chain().tween_property($Sprite2D, "position:y", 2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tween.chain().tween_property($OrbSprite, "position:y", 2, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tween.tween_property($Label, "position:y", -10, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	
-	# Pulse glow
+
+	# Glow pulse on orb alpha
 	var glow_tween = create_tween().set_loops()
-	glow_tween.tween_property($Sprite2D, "modulate:a", 0.5, 1.0)
-	glow_tween.tween_property($Sprite2D, "modulate:a", 1.0, 1.0)
+	glow_tween.tween_property($OrbSprite, "modulate:a", 0.5, 1.0)
+	glow_tween.tween_property($OrbSprite, "modulate:a", 1.0, 1.0)
+
+func _process(delta: float):
+	_ring_angle += delta * TAU / 3.0
+	queue_redraw()
+
+func _draw():
+	var color = element_colors.get(element_symbol, Color.WHITE)
+	color.a = 0.45
+	# 270-degree spinning arc — orbital ring effect
+	draw_arc(Vector2.ZERO, 12.0, _ring_angle, _ring_angle + TAU * 0.75, 36, color, 1.5, true)
 
 func collect():
 	play_collect_effect()
 	collected.emit(element_symbol)
-	# Disconnect from all to be safe before queue_free
 	for sig in collected.get_connections():
 		collected.disconnect(sig.callable)
 	queue_free()
@@ -56,9 +67,8 @@ func play_collect_effect():
 	var color = element_colors.get(element_symbol, Color.WHITE)
 	var scene_root = get_tree().current_scene
 
-	# Central flash
 	var flash = Sprite2D.new()
-	flash.texture = $Sprite2D.texture
+	flash.texture = $OrbSprite.texture
 	flash.global_position = global_position
 	flash.modulate = Color.WHITE
 	flash.z_index = 10
@@ -69,7 +79,6 @@ func play_collect_effect():
 	ft.tween_property(flash, "modulate:a", 0.0, 0.3)
 	ft.tween_callback(flash.queue_free).set_delay(0.3)
 
-	# Particle burst - 8 colored particles flying outward
 	for i in range(8):
 		var particle = ColorRect.new()
 		particle.size = Vector2(4, 4)
@@ -77,7 +86,6 @@ func play_collect_effect():
 		particle.global_position = global_position - Vector2(2, 2)
 		particle.z_index = 9
 		scene_root.add_child(particle)
-
 		var angle = i * TAU / 8.0
 		var dist = randf_range(15, 30)
 		var target = global_position + Vector2(cos(angle) * dist, sin(angle) * dist)
